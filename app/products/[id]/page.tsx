@@ -103,36 +103,58 @@ export default function ProductDetail() {
 
   const fetchProduct = async () => {
     try {
-      const response = await fetch('/api/products')
+      // Try fetching by ID directly first, then fall back to slug search
+      const idParam = params.id as string
+
+      // First try direct ID lookup
+      let response = await fetch(`/api/products?id=${encodeURIComponent(idParam)}`)
+      let foundProduct: Product | null = null
+
       if (response.ok) {
-        const products = await response.json()
-        const foundProduct = products.find((p: Product) => p.slug === params.id || p.id === params.id)
-        if (foundProduct) {
-          // Parse images if it's a JSON string
-          if (typeof foundProduct.images === 'string') {
-            try {
-              const parsedImages = JSON.parse(foundProduct.images)
-              foundProduct.images = Array.isArray(parsedImages)
-                ? parsedImages.filter((img: string) => img && img.trim() !== '')
-                : [foundProduct.image]
-            } catch {
-              foundProduct.images = [foundProduct.image]
-            }
-          }
-          // Ensure images is a valid non-empty array
-          if (!Array.isArray(foundProduct.images) || foundProduct.images.length === 0) {
-            foundProduct.images = [foundProduct.image]
-          }
-          // Filter empty URLs and deduplicate
-          foundProduct.images = [...new Set(
-            foundProduct.images.filter((img: string) => img && img.trim() !== '')
-          )]
-          if (foundProduct.images.length === 0) {
+        const data = await response.json()
+        // If API returns array, find by id or slug
+        if (Array.isArray(data)) {
+          foundProduct = data.find((p: Product) => p.id === idParam || p.slug === idParam) || null
+        } else if (data && data.id) {
+          foundProduct = data
+        }
+      }
+
+      // Fallback: load all and find
+      if (!foundProduct) {
+        const allRes = await fetch('/api/products')
+        if (allRes.ok) {
+          const all = await allRes.json()
+          foundProduct = all.find((p: Product) => p.id === idParam || p.slug === idParam) || null
+        }
+      }
+
+      if (foundProduct) {
+        // Parse images if it's a JSON string
+        if (typeof foundProduct.images === 'string') {
+          try {
+            const parsedImages = JSON.parse(foundProduct.images)
+            foundProduct.images = Array.isArray(parsedImages)
+              ? parsedImages.filter((img: string) => img && img.trim() !== '')
+              : [foundProduct.image]
+          } catch {
             foundProduct.images = [foundProduct.image]
           }
         }
-        setProduct(foundProduct || null)
+        // Ensure images is a valid non-empty array
+        if (!Array.isArray(foundProduct.images) || foundProduct.images.length === 0) {
+          foundProduct.images = [foundProduct.image]
+        }
+        // Filter empty URLs and deduplicate
+        foundProduct.images = [...new Set(
+          foundProduct.images.filter((img: string) => img && img.trim() !== '')
+        )]
+        if (foundProduct.images.length === 0) {
+          foundProduct.images = [foundProduct.image]
+        }
       }
+
+      setProduct(foundProduct)
     } catch (error) {
       console.error('Error:', error)
     }
