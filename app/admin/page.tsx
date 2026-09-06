@@ -342,9 +342,9 @@ export default function AdminDashboard() {
     const slug = formData.name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-')
     
     const productData = {
-      name: formData.name,
+      name: formData.name.slice(0, 255),
       price: parseFloat(formData.price),
-      description: formData.description,
+      description: formData.description.slice(0, 500),
       category: formData.category,
       image: formData.images[0],
       images: JSON.stringify(formData.images.filter(img => img && img.trim() !== '')),
@@ -355,15 +355,35 @@ export default function AdminDashboard() {
       colors: formData.colors,
       sale_end_date: formData.sale_end_date || null,
       viewers_count: parseInt(formData.viewers_count) || 0,
-      seo_title: formData.seo_title,
-      seo_description: formData.seo_description,
-      seo_keywords: formData.seo_keywords
+      seo_title: (formData.seo_title || '').slice(0, 60),
+      seo_description: (formData.seo_description || '').slice(0, 160),
+      seo_keywords: (formData.seo_keywords || '').slice(0, 255),
     }
 
-    if (editingProduct) {
-      await supabase.from('products').update(productData).eq('id', editingProduct.id)
-    } else {
-      await supabase.from('products').insert([productData])
+    try {
+      let res: Response
+      if (editingProduct) {
+        res = await fetch('/api/products', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: editingProduct.id, ...productData }),
+        })
+      } else {
+        res = await fetch('/api/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(productData),
+        })
+      }
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        alert(`Failed to save product: ${err.error || res.statusText}`)
+        return
+      }
+    } catch (err) {
+      alert('Network error — could not save product.')
+      return
     }
 
     setFormData({ name: '', price: '', description: '', category: '', images: [''], stock: '', currency: 'USD', sizes: '', colors: '', sale_end_date: '', viewers_count: '', seo_title: '', seo_description: '', seo_keywords: '' })
@@ -374,7 +394,12 @@ export default function AdminDashboard() {
 
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this product?')) {
-      await supabase.from('products').delete().eq('id', id)
+      const res = await fetch(`/api/products?id=${id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        alert(`Failed to delete product: ${err.error || res.statusText}`)
+        return
+      }
       fetchProducts()
     }
   }
@@ -516,7 +541,11 @@ export default function AdminDashboard() {
                         value={product.seo_title || ''}
                         onChange={async (e) => {
                           const val = e.target.value
-                          await supabase.from('products').update({ seo_title: val }).eq('id', product.id)
+                          await fetch('/api/products', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: product.id, seo_title: val }),
+                          })
                           fetchProducts()
                         }}
                         maxLength={60}
@@ -530,7 +559,11 @@ export default function AdminDashboard() {
                         value={product.seo_description || ''}
                         onChange={async (e) => {
                           const val = e.target.value
-                          await supabase.from('products').update({ seo_description: val }).eq('id', product.id)
+                          await fetch('/api/products', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: product.id, seo_description: val }),
+                          })
                           fetchProducts()
                         }}
                         maxLength={160}
@@ -546,7 +579,11 @@ export default function AdminDashboard() {
                         value={product.seo_keywords || ''}
                         onChange={async (e) => {
                           const val = e.target.value
-                          await supabase.from('products').update({ seo_keywords: val }).eq('id', product.id)
+                          await fetch('/api/products', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: product.id, seo_keywords: val }),
+                          })
                           fetchProducts()
                         }}
                         className="w-full p-2 border rounded text-sm"
@@ -1412,8 +1449,10 @@ export default function AdminDashboard() {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-black h-24"
+                maxLength={500}
                 required
               />
+              <p className="text-xs text-gray-400 text-right">{(formData.description || '').length}/500</p>
 
               <div className="border-t pt-4">
                 <h3 className="font-medium mb-3">SEO Settings</h3>
