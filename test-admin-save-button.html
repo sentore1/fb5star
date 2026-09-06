@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Save Button</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+        }
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        button {
+            background: #000;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #333;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        .checklist li {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        .checklist li:before {
+            content: "☐ ";
+            margin-right: 10px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛠️ Admin "Save Layout Settings" Button Test Guide</h1>
+        
+        <div class="warning">
+            <strong>⚠️ Before You Start:</strong>
+            <ul>
+                <li>Make sure your development server is running (<code>npm run dev</code>)</li>
+                <li>Ensure you're logged in as admin</li>
+                <li>Have your browser console open (F12)</li>
+            </ul>
+        </div>
+
+        <h2>📋 Testing Checklist</h2>
+        <ul class="checklist">
+            <li>Development server is running on http://localhost:3000</li>
+            <li>Logged into admin dashboard (/admin)</li>
+            <li>Browser console is open (Press F12)</li>
+            <li>Navigated to "Layout" tab in admin</li>
+            <li>Database has site_settings record (run SQL script if unsure)</li>
+        </ul>
+
+        <h2>🔍 Step-by-Step Test</h2>
+        
+        <div class="step">
+            <h3>Step 1: Open Admin Dashboard</h3>
+            <p>Navigate to: <code>http://localhost:3000/admin</code></p>
+            <button onclick="window.open('http://localhost:3000/admin', '_blank')">
+                Open Admin Dashboard
+            </button>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Check Database</h3>
+            <p>Open Supabase and run this query:</p>
+            <code style="display: block; padding: 10px; margin: 10px 0;">
+                SELECT COUNT(*) FROM site_settings;
+            </code>
+            <p>Result should be <strong>1</strong>. If 0, run the fix script.</p>
+            <button onclick="window.open('https://app.supabase.com', '_blank')">
+                Open Supabase Dashboard
+            </button>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Test the Button</h3>
+            <ol>
+                <li>Click on the <strong>"Layout"</strong> tab</li>
+                <li>Change any setting (e.g., Product Grid Columns)</li>
+                <li>Click <strong>"Save Layout Settings"</strong></li>
+                <li>Watch for:
+                    <ul>
+                        <li>Alert popup saying "Settings saved successfully!"</li>
+                        <li>OR error message in console/alert</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3>Step 4: Check Console for Errors</h3>
+            <p>Press <code>F12</code> and look in the Console tab for:</p>
+            <ul>
+                <li class="success">No errors = Success! ✅</li>
+                <li class="error">"Save error:" = Database issue ❌</li>
+                <li class="error">"Exception:" = Code error ❌</li>
+            </ul>
+        </div>
+
+        <h2>🐛 Common Issues & Fixes</h2>
+
+        <div class="step error">
+            <h4>Issue: "No settings record found"</h4>
+            <p><strong>Fix:</strong> Run <code>check-and-fix-site-settings.sql</code> in Supabase</p>
+        </div>
+
+        <div class="step error">
+            <h4>Issue: Button does nothing</h4>
+            <p><strong>Fix:</strong> Check browser console for JavaScript errors</p>
+        </div>
+
+        <div class="step error">
+            <h4>Issue: Permission denied</h4>
+            <p><strong>Fix:</strong> Check RLS policies on site_settings table</p>
+            <code style="display: block; padding: 10px; margin: 10px 0;">
+                SELECT * FROM pg_policies WHERE tablename = 'site_settings';
+            </code>
+        </div>
+
+        <h2>📊 What Changed</h2>
+        <div class="step success">
+            <ul>
+                <li>✅ Added console.error logging to saveSiteSettings function</li>
+                <li>✅ Added better error messages in alerts</li>
+                <li>✅ Added check for missing database record</li>
+                <li>✅ Improved error handling for JSON stringification</li>
+            </ul>
+        </div>
+
+        <h2>🎯 Expected Behavior</h2>
+        <div class="step success">
+            <p>When everything works correctly:</p>
+            <ol>
+                <li>Click "Save Layout Settings"</li>
+                <li>See alert: "Settings saved successfully!"</li>
+                <li>No errors in console</li>
+                <li>Changes are persisted (refresh page to verify)</li>
+            </ol>
+        </div>
+
+        <div class="warning">
+            <strong>💡 Pro Tip:</strong> Keep the browser console open while testing. 
+            Any errors will show there first, giving you immediate feedback.
+        </div>
+
+        <h2>📁 Files Modified</h2>
+        <ul>
+            <li><code>app/admin/page.tsx</code> - Updated saveSiteSettings function</li>
+            <li><code>check-and-fix-site-settings.sql</code> - SQL script to fix database</li>
+            <li><code>SAVE-BUTTON-FIX-GUIDE.md</code> - Detailed documentation</li>
+        </ul>
+
+        <hr style="margin: 30px 0;">
+        
+        <div class="step">
+            <h3>🚀 Ready to Test?</h3>
+            <button onclick="window.open('http://localhost:3000/admin', '_blank')" style="background: #4CAF50;">
+                Go to Admin Dashboard
+            </button>
+            <button onclick="alert('1. Open Admin\\n2. Go to Layout tab\\n3. Change a setting\\n4. Click Save Layout Settings\\n5. Check console for errors')">
+                Show Quick Steps
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Auto-detect if dev server is running
+        fetch('http://localhost:3000')
+            .then(() => {
+                console.log('✅ Dev server is running on port 3000');
+            })
+            .catch(() => {
+                fetch('http://localhost:3001')
+                    .then(() => {
+                        console.log('✅ Dev server is running on port 3001');
+                    })
+                    .catch(() => {
+                        console.warn('⚠️ Dev server might not be running. Start it with: npm run dev');
+                    });
+            });
+    </script>
+</body>
+</html>
