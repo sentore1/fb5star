@@ -23,13 +23,13 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Fb5Star - Luxury High-End Fashion & Designer Clothing",
-  description: "Discover luxury high-end fashion at Fb5Star. Shop premium designer clothing, elegant dresses, sophisticated accessories, and timeless pieces crafted for the modern wardrobe.",
-  keywords: "luxury fashion, high-end clothing, designer wear, premium apparel, elegant dresses, sophisticated style, luxury brand, designer fashion, exclusive clothing, Fb5Star",
+  title: "Fb5Star - Luxury High-End Home equipment",
+  description: "Discover luxury high-end equipment at Fb5Star. Shop premium designer.",
+  keywords: "Fridge, high-end coffee maker Fb5Star",
   authors: [{ name: "Fb5Star" }],
   openGraph: {
-    title: "Fb5Star - Luxury High-End Fashion & Designer Clothing",
-    description: "Discover luxury high-end fashion at Fb5Star. Shop premium designer clothing, elegant dresses, sophisticated accessories, and timeless pieces.",
+    title: "Fb5Star - Luxury High-End Equipment &  Home tools",
+    description: "Fridge, high-end coffee maker Fb5Star.",
     url: "https://Fb5Star.com",
     siteName: "Fb5Star",
     images: [{ url: "/og-image.jpg", width: 1200, height: 630 }],
@@ -43,8 +43,11 @@ export const metadata: Metadata = {
     images: ["/og-image.jpg"],
   },
   icons: {
-    icon: "/favicon.png",
-    shortcut: "/favicon.png",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.png", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
     apple: "/favicon.png",
   },
   robots: {
